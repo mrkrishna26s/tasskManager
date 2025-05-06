@@ -1,46 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography } from '@mui/material';
-import API from '../services/api';
-import TaskForm from '../components/Tasks/TaskForm';
+import React, { useState, useEffect } from 'react';
+import { Container, Tabs, Tab, Box, Typography } from '@mui/material';
 import TaskCard from '../components/Tasks/TaskCard';
+import TaskForm from '../components/Tasks/TaskForm';
 import TaskFilters from '../components/Tasks/TaskFilters';
+import API from '../services/api';
 
 const Dashboard = () => {
+  const [value, setValue] = useState(0);
   const [tasks, setTasks] = useState([]);
-  const [filters, setFilters] = useState({
-    search: '',
-    status: '',
-    priority: '',
-    dueDate: ''
-  });
+  const [filters, setFilters] = useState({ search: '', status: '', priority: '', dueDate: '' });
+  const user = JSON.parse(localStorage.getItem('user'));
 
-  const fetchTasks = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const queryParams = new URLSearchParams(filters);
-      const res = await API.get(`/tasks?${queryParams.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setTasks(res.data);
-    } catch (err) {
-      alert('Error fetching tasks');
-    }
+  const fetchTasks = async (type = 'all') => {
+    const token = localStorage.getItem('token');
+    const query = new URLSearchParams(filters);
+    if (type === 'created') query.append('createdBy', user.id);
+    if (type === 'assigned') query.append('assignedTo', user.id);
+
+    const res = await API.get(`/tasks?${query.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setTasks(res.data);
   };
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
+  const handleTabChange = (event, newValue) => {
+    setValue(newValue);
+    if (newValue === 0) fetchTasks(); // All
+    if (newValue === 1) fetchTasks('created');
+    if (newValue === 2) fetchTasks('assigned');
+  };
+
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>Dashboard</Typography>
-      <TaskForm onTaskCreated={fetchTasks} />
-      <TaskFilters filters={filters} setFilters={setFilters} onSearch={fetchTasks} />
-      {tasks.map((task) => (
-        <TaskCard key={task._id} task={task} />
-      ))}
+      <Typography variant="h4" sx={{ mb: 2 }}>Welcome, {user?.name || 'User'}</Typography>
+
+      <Tabs value={value} onChange={handleTabChange} sx={{ mb: 2 }}>
+        <Tab label="All Tasks" />
+        <Tab label="My Created Tasks" />
+        <Tab label="Assigned To Me" />
+        <Tab label="Create Task" />
+      </Tabs>
+
+      {value !== 3 && (
+        <>
+          <TaskFilters filters={filters} setFilters={setFilters} onSearch={() => fetchTasks(['all', 'created', 'assigned'][value])} />
+          {tasks.length === 0 ? (
+            <Typography>No tasks found.</Typography>
+          ) : (
+            tasks.map(task => <TaskCard key={task._id} task={task} />)
+          )}
+        </>
+      )}
+
+      {value === 3 && <TaskForm onTaskCreated={() => fetchTasks(['all', 'created', 'assigned'][value])} />}
     </Container>
   );
 };
