@@ -20,17 +20,26 @@ const TaskForm = ({ onTaskCreated }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await API.post('/tasks', task, {
+  
+      // Create a new object excluding assignedTo if it's empty
+      const taskData = { ...task };
+      if (!taskData.assignedTo || taskData.assignedTo.trim() === '') {
+        delete taskData.assignedTo; // Remove assignedTo if it's empty
+      }
+  
+      await API.post('/tasks', taskData, {
         headers: {
           Authorization: token,
         },
       });
-      onTaskCreated(); // refresh task list
+  
+      onTaskCreated(); // Refresh task list
       setTask({ title: '', description: '', dueDate: '', priority: '', status: 'Pending', assignedTo: '' });
     } catch (err) {
       alert('Error creating task');
     }
   };
+  
 
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3 }}>

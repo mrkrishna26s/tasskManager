@@ -1,4 +1,4 @@
-import Task from '../models/task.js';
+import Task from '../models/Task.js';
 
 export const createTask = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ export const createTask = async (req, res) => {
       dueDate,
       priority,
       status,
-      createdBy: req.user.id,
+      createdBy: req.user.createdBy,
       assignedTo
     });
     await task.save();

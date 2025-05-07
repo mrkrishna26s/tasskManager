@@ -4,6 +4,7 @@ import TaskCard from '../components/Tasks/TaskCard';
 import TaskForm from '../components/Tasks/TaskForm';
 import TaskFilters from '../components/Tasks/TaskFilters';
 import API from '../services/api';
+import Logout from '../components/Logout'; // ✅ Already imported
 
 const Dashboard = () => {
   const [value, setValue] = useState(0);
@@ -36,7 +37,10 @@ const Dashboard = () => {
 
   return (
     <Container>
-      <Typography variant="h4" sx={{ mb: 2 }}>Welcome, {user?.name || 'User'}</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mt: 2, mb: 2 }}>
+        <Typography variant="h4">Welcome, {user?.name || 'User'}</Typography>
+        <Logout /> 
+      </Box>
 
       <Tabs value={value} onChange={handleTabChange} sx={{ mb: 2 }}>
         <Tab label="All Tasks" />
@@ -47,7 +51,11 @@ const Dashboard = () => {
 
       {value !== 3 && (
         <>
-          <TaskFilters filters={filters} setFilters={setFilters} onSearch={() => fetchTasks(['all', 'created', 'assigned'][value])} />
+          <TaskFilters
+            filters={filters}
+            setFilters={setFilters}
+            onSearch={() => fetchTasks(['all', 'created', 'assigned'][value])}
+          />
           {tasks.length === 0 ? (
             <Typography>No tasks found.</Typography>
           ) : (
@@ -56,7 +64,9 @@ const Dashboard = () => {
         </>
       )}
 
-      {value === 3 && <TaskForm onTaskCreated={() => fetchTasks(['all', 'created', 'assigned'][value])} />}
+      {value === 3 && (
+        <TaskForm onTaskCreated={() => fetchTasks(['all', 'created', 'assigned'][value])} />
+      )}
     </Container>
   );
 };

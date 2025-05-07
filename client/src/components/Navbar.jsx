@@ -21,7 +21,7 @@ const Navbar = () => {
           <IconButton color="inherit" href="https://github.com/" target="_blank">
             <GitHubIcon />
           </IconButton>
-          <IconButton color="inherit" href="https://linkedin.com/" target="_blank">
+          <IconButton color="inherit" href="https://www.linkedin.com/in/mekrishna   " target="_blank">
             <LinkedInIcon />
           </IconButton>
 
