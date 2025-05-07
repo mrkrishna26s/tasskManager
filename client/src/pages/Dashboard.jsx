@@ -35,11 +35,26 @@ const Dashboard = () => {
     if (newValue === 2) fetchTasks('assigned');
   };
 
+  // New delete function to remove task via API
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      await API.delete(`/tasks/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchTasks(['all', 'created', 'assigned'][value]); // refresh task list
+    } catch (err) {
+      console.error('Error deleting task:', err);
+      alert('Failed to delete task.');
+    }
+  };
+
   return (
     <Container>
+      {/*Logout button added in top right */}
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mt: 2, mb: 2 }}>
         <Typography variant="h4">Welcome, {user?.name || 'User'}</Typography>
-        <Logout /> 
+        <Logout />
       </Box>
 
       <Tabs value={value} onChange={handleTabChange} sx={{ mb: 2 }}>
@@ -59,7 +74,10 @@ const Dashboard = () => {
           {tasks.length === 0 ? (
             <Typography>No tasks found.</Typography>
           ) : (
-            tasks.map(task => <TaskCard key={task._id} task={task} />)
+            // ✅ Step 3: Pass onDelete prop to TaskCard
+            tasks.map(task => (
+              <TaskCard key={task._id} task={task} onDelete={handleDelete} />
+            ))
           )}
         </>
       )}
