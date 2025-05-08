@@ -9,10 +9,27 @@ import taskRoutes from './routes/taskRoutes.js';
 dotenv.config();
 const app = express();
 // app.use(cors());
+// app.use(cors({
+//   origin: 'http://localhost:5173',
+//   credentials: true
+// }));
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://tassk-manager.vercel.app',
+  'https://tassk-manager-dm9m3iv8d-mrkrishna26s-projects.vercel.app'
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
 
 
 app.use(express.json());
